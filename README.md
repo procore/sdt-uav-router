@@ -126,3 +126,11 @@ is equivalent to:
 ```javascript
 router.set('view=details&itemId=123');
 ```
+
+## Reloading
+
+It's occasionally necessary to re-run the app entry function without changing anything in the URL (usually after some other app state has changed, such as credential expiry). This can be done by calling `router.load()`.
+
+# Browser support
+
+Modern browsers and IE10+

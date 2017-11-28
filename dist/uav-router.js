@@ -112,7 +112,7 @@
             params = deserialize(params);
         }
 
-        return params;
+        return params || {};
     }
 
     /**
@@ -125,7 +125,7 @@
 
     function replaceURL() {
 
-        location.replace(location.pathname + '#' + serialize(router.params));
+        history.replaceState(undefined, undefined, '#' + serialize(router.params));
     }
 
     /**
@@ -137,9 +137,12 @@
 
         unbindHashChange();
 
-        callback();
+        setTimeout(function () {
 
-        setTimeout(bindHashChange);
+            callback();
+
+            setTimeout(bindHashChange);
+        });
     }
 
     /**
@@ -216,6 +219,8 @@
     };
 
     var router = {
+
+        params: {},
 
         url: url,
 

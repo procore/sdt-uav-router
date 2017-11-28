@@ -123,7 +123,7 @@
 
         }
 
-        return params;
+        return params || {};
 
     }
 
@@ -138,7 +138,7 @@
 
     function replaceURL() {
 
-        location.replace(`${location.pathname}#${serialize(router.params)}`);
+        history.replaceState(undefined, undefined, '#' + serialize(router.params));
 
     }
 
@@ -151,9 +151,13 @@
 
         unbindHashChange();
 
-        callback();
+        setTimeout(() => {
 
-        setTimeout(bindHashChange);
+            callback();
+
+            setTimeout(bindHashChange);
+
+        });
 
     }
 
@@ -232,6 +236,8 @@
     };
 
     const router = {
+
+        params: {},
 
         url,
 

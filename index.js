@@ -15,7 +15,11 @@
 
         Object.keys(obj).forEach(key => {
 
-            parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`);
+            if (obj[key] !== undefined) {
+
+                parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`);
+
+            }
 
         });
 

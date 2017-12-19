@@ -16,7 +16,10 @@
 
         Object.keys(obj).forEach(function (key) {
 
-            parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
+            if (obj[key] !== undefined) {
+
+                parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
+            }
         });
 
         return parts.join('&');

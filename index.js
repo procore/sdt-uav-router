@@ -64,9 +64,19 @@
     /**
      * Set the URL to reflect router.params
      */
-    function syncURL() {
+    function syncURL(forceLoad) {
 
-        location.hash = serialize(router.params);
+        const hash = serialize(router.params);
+
+        if (forceLoad && location.hash === hash) {
+
+            router.load();
+
+        } else {
+
+            location.hash = hash;
+
+        }
 
     }
 
@@ -279,7 +289,7 @@
 
             removeParams(params);
 
-            syncURL();
+            syncURL(true);
 
         },
 
@@ -291,7 +301,7 @@
 
             mergeParams(params);
 
-            syncURL();
+            syncURL(true);
 
         },
 
@@ -303,7 +313,7 @@
 
             router.params = normalize(params);
 
-            syncURL();
+            syncURL(true);
 
         },
 

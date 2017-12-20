@@ -1,6 +1,6 @@
 {
   "name": "uav-router",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Simple hash-based routing for single page apps",
   "main": "dist/uav-router.js",
   "scripts": {

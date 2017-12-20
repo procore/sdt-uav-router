@@ -262,7 +262,11 @@
          */
         load() {
 
-            router.app(router.params);
+            if (router.app) {
+
+                router.app(router.params);
+
+            }
 
         },
 

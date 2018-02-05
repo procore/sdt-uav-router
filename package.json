@@ -1,6 +1,6 @@
 {
   "name": "uav-router",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Simple hash-based routing for single page apps",
   "main": "dist/uav-router.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "uav"
   ],
   "author": "unearth",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "bugs": {
     "url": "https://github.com/unearth-inc/uav-router/issues"
   },

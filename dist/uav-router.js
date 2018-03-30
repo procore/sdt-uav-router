@@ -184,6 +184,21 @@
 
 
         /**
+         * Remove the provided keys form the URL
+         * without adding a browser history entry
+         */
+        removeReplace: function removeReplace() {
+            for (var _len2 = arguments.length, params = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                params[_key2] = arguments[_key2];
+            }
+
+            removeParams(params);
+
+            changeURL(replaceURL);
+        },
+
+
+        /**
          * Add the provided keys to the URL
          */
         merge: function merge(params) {
@@ -269,13 +284,29 @@
          * and reload the app.
          */
         remove: function remove() {
-            for (var _len2 = arguments.length, params = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-                params[_key2] = arguments[_key2];
+            for (var _len3 = arguments.length, params = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+                params[_key3] = arguments[_key3];
             }
 
             removeParams(params);
 
             syncURL(true);
+        },
+
+
+        /**
+         * Remove the provided keys form the URL
+         * without adding a browser history entry
+         * and reload the app.
+         */
+        removeReplace: function removeReplace() {
+            for (var _len4 = arguments.length, params = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+                params[_key4] = arguments[_key4];
+            }
+
+            removeParams(params);
+
+            replaceURL();
         },
 
 

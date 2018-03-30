@@ -202,6 +202,18 @@
         },
 
         /**
+         * Remove the provided keys form the URL
+         * without adding a browser history entry
+         */
+        removeReplace(...params) {
+
+            removeParams(params);
+
+            changeURL(replaceURL);
+
+        },
+
+        /**
          * Add the provided keys to the URL
          */
         merge(params) {
@@ -294,6 +306,19 @@
             removeParams(params);
 
             syncURL(true);
+
+        },
+
+        /**
+         * Remove the provided keys form the URL
+         * without adding a browser history entry
+         * and reload the app.
+         */
+        removeReplace(...params) {
+
+            removeParams(params);
+
+            replaceURL();
 
         },
 

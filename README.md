@@ -110,6 +110,16 @@ Merge the given params into the current URL without adding a browser history ent
 
 Merge the given params into the current URL without adding a browser history entry, *without* re-rendering the app.
 
+### `removeReplace(params)`
+
+`router.removeReplace(params)`
+
+Remove the given params from the current URL without adding a browser history entry, *and* re-render the app.
+
+`router.removeReplace(params)`
+
+Remove the given params from the current URL without adding a browser history entry, *without* re-rendering the app.
+
 ---
 
 All of the above methods accept either an object or a serialized string. For example:

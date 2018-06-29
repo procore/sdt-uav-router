@@ -152,7 +152,13 @@
 
     function replaceURL() {
 
-        history.replaceState(undefined, undefined, '#' + serialize(router.params));
+        const hash = '#' + serialize(router.params);
+
+        if (location.hash !== hash) {
+
+            history.replaceState(undefined, undefined, hash);
+
+        }
 
     }
 

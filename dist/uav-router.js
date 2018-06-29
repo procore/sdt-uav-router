@@ -136,7 +136,12 @@
 
     function replaceURL() {
 
-        history.replaceState(undefined, undefined, '#' + serialize(router.params));
+        var hash = '#' + serialize(router.params);
+
+        if (location.hash !== hash) {
+
+            history.replaceState(undefined, undefined, hash);
+        }
     }
 
     /**

@@ -17,7 +17,7 @@
 
             if (obj[key] !== undefined) {
 
-                parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`);
+                parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
 
             }
 

@@ -4,7 +4,7 @@
 
 Unlike many routers, `uav-router` uses the hash fragment of the URL as a key-value store to instantiate your app state, doing away with the faux directory hierarchy implemented by most routing solutions. For example, if a traditional URL looks like `website.com/users/userId`, then `uav-router` would use `website.com#user=userId`.
 
-By definition all single page apps serve the same file regardless of the URL. Reflecting this reality in application routing leads to nontrivial complexity savings. `uav-router` is 650 bytes gzipped.
+By definition all single page apps serve the same file regardless of the URL. Reflecting this reality in application routing leads to nontrivial complexity savings. `uav-router` is 700 bytes gzipped.
 
 ## Example
 
@@ -116,7 +116,7 @@ Merge the given params into the current URL without adding a browser history ent
 
 Remove the given params from the current URL without adding a browser history entry, *and* re-render the app.
 
-`router.removeReplace(params)`
+`router.url.removeReplace(params)`
 
 Remove the given params from the current URL without adding a browser history entry, *without* re-rendering the app.
 

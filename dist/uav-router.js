@@ -152,13 +152,13 @@
   function changeURL(callback) {
     if (!pendingCallbacks.length) {
       unbindHashChange();
-      setTimeout(function () {
+      requestAnimationFrame(function () {
         var callbacks = Array.from(pendingCallbacks);
         pendingCallbacks = [];
         callbacks.forEach(function (fn) {
           return fn();
         });
-        setTimeout(bindHashChange);
+        requestAnimationFrame(bindHashChange);
       });
     }
 

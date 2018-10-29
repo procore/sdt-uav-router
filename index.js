@@ -210,7 +210,7 @@
 
             unbindHashChange();
 
-            setTimeout(() => {
+            requestAnimationFrame(() => {
 
                 const callbacks = Array.from(pendingCallbacks);
 
@@ -218,7 +218,7 @@
 
                 callbacks.forEach(fn => fn());
 
-                setTimeout(bindHashChange);
+                requestAnimationFrame(bindHashChange);
 
             });
 

@@ -1,5 +1,7 @@
 (() => {
 
+    let pendingCallbacks = [];
+
     /**
      * Convert an object to key=value&key=value notation.
      */
@@ -97,20 +99,7 @@
      */
     function bindHashChange() {
 
-        /**
-         * If unbindHashChange() has been called multiple times,
-         * bindHashChange() must be called an equal number of
-         * times before the listener is actually bound.
-         */
-        router.unbound--;
-
-        if (router.unbound < 1) {
-
-            router.unbound = 0;
-
-            window.addEventListener('hashchange', hashchange);
-
-        }
+        window.addEventListener('hashchange', hashchange);
 
     }
 
@@ -118,8 +107,6 @@
      * Stop listening for URL changes
      */
     function unbindHashChange() {
-
-        router.unbound++;
 
         window.removeEventListener('hashchange', hashchange);
 
@@ -141,12 +128,62 @@
 
     }
 
+    function paramsAreDifferent(params) {
+
+        const newKeys = Object.keys(params);
+
+        const oldKeys = Object.keys(router.params);
+
+        if (newKeys.length !== oldKeys.length) {
+
+            return true;
+
+        }
+
+        for (let i = 0; i < newKeys.length; i++) {
+
+            if (router.params[newKeys[i]] !== params[newKeys[i]]) {
+
+                return true;
+
+            }
+
+        }
+
+        for (let i = 0; i < oldKeys.length; i++) {
+
+            if (router.params[oldKeys[i]] !== params[oldKeys[i]]) {
+
+                return true;
+
+            }
+
+        }
+
+    }
+
     /**
      * Merge the given params with router.params
      */
     function mergeParams(params) {
 
-        Object.assign(router.params, normalize(params));
+        let isDifferent;
+
+        params = normalize(params);
+
+        Object.keys(params).forEach(key => {
+
+            if (router.params[key] !== params[key]) {
+
+                isDifferent = true;
+
+                router.params[key] = params[key];
+
+            }
+
+        });
+
+        return isDifferent;
 
     }
 
@@ -169,15 +206,25 @@
      */
     function changeURL(callback) {
 
-        unbindHashChange();
+        if (!pendingCallbacks.length) {
 
-        setTimeout(() => {
+            unbindHashChange();
 
-            callback();
+            setTimeout(() => {
 
-            setTimeout(bindHashChange);
+                const callbacks = Array.from(pendingCallbacks);
 
-        });
+                pendingCallbacks = [];
+
+                callbacks.forEach(fn => fn());
+
+                setTimeout(bindHashChange);
+
+            });
+
+        }
+
+        pendingCallbacks.push(callback);
 
     }
 
@@ -186,11 +233,21 @@
      */
     function removeParams(params) {
 
+        let isDifferent;
+
         params.forEach(param => {
 
-            delete router.params[param];
+            if (router.params[param] !== undefined) {
+
+                isDifferent = true;
+
+                delete router.params[param];
+
+            }
 
         });
+
+        return isDifferent;
 
     }
 
@@ -201,9 +258,11 @@
          */
         remove(...params) {
 
-            removeParams(params);
+            if (removeParams(params)) {
 
-            url.set(router.params);
+                url.set(router.params, true);
+
+            }
 
         },
 
@@ -213,9 +272,11 @@
          */
         removeReplace(...params) {
 
-            removeParams(params);
+            if (removeParams(params)) {
 
-            changeURL(replaceURL);
+                changeURL(replaceURL);
+
+            }
 
         },
 
@@ -224,20 +285,28 @@
          */
         merge(params) {
 
-            mergeParams(params);
+            if (mergeParams(params)) {
 
-            changeURL(syncURL);
+                changeURL(syncURL);
+
+            }
 
         },
 
         /**
          * Update the URL to match the given params
          */
-        set(params) {
+        set(params, force) {
 
-            router.params = normalize(params);
+            params = normalize(params);
 
-            changeURL(syncURL);
+            if (force || paramsAreDifferent(params)) {
+
+                router.params = params;
+
+                changeURL(syncURL);
+
+            }
 
         },
 
@@ -247,9 +316,15 @@
          */
         replace(params) {
 
-            router.params = normalize(params);
+            params = normalize(params);
 
-            changeURL(replaceURL);
+            if (paramsAreDifferent(params)) {
+
+                router.params = params;
+
+                changeURL(replaceURL);
+
+            }
 
         },
 
@@ -259,9 +334,11 @@
          */
         mergeReplace(params) {
 
-            mergeParams(params);
+            if (mergeParams(params)) {
 
-            changeURL(replaceURL);
+                changeURL(replaceURL);
+
+            }
 
         }
 

@@ -1,9 +1,11 @@
 "use strict";
 
 (function () {
+  var pendingCallbacks = [];
   /**
    * Convert an object to key=value&key=value notation.
    */
+
   function serialize(obj) {
     if (!obj) {
       return '';
@@ -72,17 +74,7 @@
 
 
   function bindHashChange() {
-    /**
-     * If unbindHashChange() has been called multiple times,
-     * bindHashChange() must be called an equal number of
-     * times before the listener is actually bound.
-     */
-    router.unbound--;
-
-    if (router.unbound < 1) {
-      router.unbound = 0;
-      window.addEventListener('hashchange', hashchange);
-    }
+    window.addEventListener('hashchange', hashchange);
   }
   /**
    * Stop listening for URL changes
@@ -90,7 +82,6 @@
 
 
   function unbindHashChange() {
-    router.unbound++;
     window.removeEventListener('hashchange', hashchange);
   }
   /**
@@ -106,13 +97,42 @@
 
     return params || {};
   }
+
+  function paramsAreDifferent(params) {
+    var newKeys = Object.keys(params);
+    var oldKeys = Object.keys(router.params);
+
+    if (newKeys.length !== oldKeys.length) {
+      return true;
+    }
+
+    for (var i = 0; i < newKeys.length; i++) {
+      if (router.params[newKeys[i]] !== params[newKeys[i]]) {
+        return true;
+      }
+    }
+
+    for (var _i = 0; _i < oldKeys.length; _i++) {
+      if (router.params[oldKeys[_i]] !== params[oldKeys[_i]]) {
+        return true;
+      }
+    }
+  }
   /**
    * Merge the given params with router.params
    */
 
 
   function mergeParams(params) {
-    Object.assign(router.params, normalize(params));
+    var isDifferent;
+    params = normalize(params);
+    Object.keys(params).forEach(function (key) {
+      if (router.params[key] !== params[key]) {
+        isDifferent = true;
+        router.params[key] = params[key];
+      }
+    });
+    return isDifferent;
   }
 
   function replaceURL() {
@@ -130,11 +150,19 @@
 
 
   function changeURL(callback) {
-    unbindHashChange();
-    setTimeout(function () {
-      callback();
-      setTimeout(bindHashChange);
-    });
+    if (!pendingCallbacks.length) {
+      unbindHashChange();
+      setTimeout(function () {
+        var callbacks = Array.from(pendingCallbacks);
+        pendingCallbacks = [];
+        callbacks.forEach(function (fn) {
+          return fn();
+        });
+        setTimeout(bindHashChange);
+      });
+    }
+
+    pendingCallbacks.push(callback);
   }
   /**
    * Remove the given parameters from router.params
@@ -142,9 +170,14 @@
 
 
   function removeParams(params) {
+    var isDifferent;
     params.forEach(function (param) {
-      delete router.params[param];
+      if (router.params[param] !== undefined) {
+        isDifferent = true;
+        delete router.params[param];
+      }
     });
+    return isDifferent;
   }
 
   var url = {
@@ -156,8 +189,9 @@
         params[_key] = arguments[_key];
       }
 
-      removeParams(params);
-      url.set(router.params);
+      if (removeParams(params)) {
+        url.set(router.params, true);
+      }
     },
 
     /**
@@ -169,24 +203,30 @@
         params[_key2] = arguments[_key2];
       }
 
-      removeParams(params);
-      changeURL(replaceURL);
+      if (removeParams(params)) {
+        changeURL(replaceURL);
+      }
     },
 
     /**
      * Add the provided keys to the URL
      */
     merge: function merge(params) {
-      mergeParams(params);
-      changeURL(syncURL);
+      if (mergeParams(params)) {
+        changeURL(syncURL);
+      }
     },
 
     /**
      * Update the URL to match the given params
      */
-    set: function set(params) {
-      router.params = normalize(params);
-      changeURL(syncURL);
+    set: function set(params, force) {
+      params = normalize(params);
+
+      if (force || paramsAreDifferent(params)) {
+        router.params = params;
+        changeURL(syncURL);
+      }
     },
 
     /**
@@ -194,8 +234,12 @@
      * a browser history entry
      */
     replace: function replace(params) {
-      router.params = normalize(params);
-      changeURL(replaceURL);
+      params = normalize(params);
+
+      if (paramsAreDifferent(params)) {
+        router.params = params;
+        changeURL(replaceURL);
+      }
     },
 
     /**
@@ -203,8 +247,9 @@
      * adding a browser history entry
      */
     mergeReplace: function mergeReplace(params) {
-      mergeParams(params);
-      changeURL(replaceURL);
+      if (mergeParams(params)) {
+        changeURL(replaceURL);
+      }
     }
   };
   var router = {

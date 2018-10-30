@@ -1,6 +1,7 @@
 (() => {
 
-    let pendingCallbacks = [];
+    let syncPending,
+        loadPending;
 
     /**
      * Convert an object to key=value&key=value notation.
@@ -66,17 +67,19 @@
     /**
      * Set the URL to reflect router.params
      */
-    function syncURL(forceLoad) {
+    function syncURL() {
 
         const hash = serialize(router.params);
 
-        if (forceLoad && location.hash === hash) {
+        if (!syncPending) {
 
-            router.load();
+            syncPending = true;
 
-        } else {
+            requestAnimationFrame(() => {
 
-            location.hash = hash;
+                location.hash = hash;
+
+            });
 
         }
 
@@ -88,29 +91,19 @@
      */
     const hashchange = () => {
 
-        syncParams();
+        if (syncPending) {
 
-        router.load();
+            syncPending = false;
+
+        } else {
+
+            syncParams();
+
+            router.load();
+
+        }
 
     };
-
-    /**
-     * Start listening for URL changes
-     */
-    function bindHashChange() {
-
-        window.addEventListener('hashchange', hashchange);
-
-    }
-
-    /**
-     * Stop listening for URL changes
-     */
-    function unbindHashChange() {
-
-        window.removeEventListener('hashchange', hashchange);
-
-    }
 
     /**
      * Take either an object or a serialized string,
@@ -140,19 +133,11 @@
 
         }
 
-        for (let i = 0; i < newKeys.length; i++) {
+        const keys = newKeys.length > oldKeys.length ? newKeys : oldKeys;
 
-            if (router.params[newKeys[i]] !== params[newKeys[i]]) {
+        for (let i = 0; i < keys.length; i++) {
 
-                return true;
-
-            }
-
-        }
-
-        for (let i = 0; i < oldKeys.length; i++) {
-
-            if (router.params[oldKeys[i]] !== params[oldKeys[i]]) {
+            if (router.params[keys[i]] !== params[keys[i]]) {
 
                 return true;
 
@@ -200,35 +185,6 @@
     }
 
     /**
-     * Handles the given parameters, and runs the
-     * provided callback for changing the URL without
-     * reloading the app.
-     */
-    function changeURL(callback) {
-
-        if (!pendingCallbacks.length) {
-
-            unbindHashChange();
-
-            requestAnimationFrame(() => {
-
-                const callbacks = Array.from(pendingCallbacks);
-
-                pendingCallbacks = [];
-
-                callbacks.forEach(fn => fn());
-
-                requestAnimationFrame(bindHashChange);
-
-            });
-
-        }
-
-        pendingCallbacks.push(callback);
-
-    }
-
-    /**
      * Remove the given parameters from router.params
      */
     function removeParams(params) {
@@ -267,14 +223,14 @@
         },
 
         /**
-         * Remove the provided keys form the URL
+         * Remove the provided keys from the URL
          * without adding a browser history entry
          */
         removeReplace(...params) {
 
             if (removeParams(params)) {
 
-                changeURL(replaceURL);
+                replaceURL();
 
             }
 
@@ -287,7 +243,7 @@
 
             if (mergeParams(params)) {
 
-                changeURL(syncURL);
+                syncURL();
 
             }
 
@@ -304,7 +260,7 @@
 
                 router.params = params;
 
-                changeURL(syncURL);
+                syncURL();
 
             }
 
@@ -322,7 +278,7 @@
 
                 router.params = params;
 
-                changeURL(replaceURL);
+                replaceURL();
 
             }
 
@@ -336,7 +292,7 @@
 
             if (mergeParams(params)) {
 
-                changeURL(replaceURL);
+                replaceURL();
 
             }
 
@@ -350,16 +306,22 @@
 
         url,
 
-        unbound: 1,
-
         /**
          * Reload the app.
          */
         load() {
 
-            if (router.app) {
+            if (router.app && !loadPending) {
 
-                router.app(router.params);
+                loadPending = true;
+
+                requestAnimationFrame(() => {
+
+                    loadPending = false;
+
+                    router.app(router.params);
+
+                });
 
             }
 
@@ -372,7 +334,9 @@
 
             router.app = app;
 
-            bindHashChange();
+            window.addEventListener('hashchange', hashchange, {
+                passive: true
+            });
 
             syncParams();
 
@@ -388,12 +352,14 @@
 
             removeParams(params);
 
-            syncURL(true);
+            syncURL();
+
+            router.load();
 
         },
 
         /**
-         * Remove the provided keys form the URL
+         * Remove the provided keys from the URL
          * without adding a browser history entry
          * and reload the app.
          */
@@ -402,6 +368,8 @@
             removeParams(params);
 
             replaceURL();
+
+            router.load();
 
         },
 
@@ -413,7 +381,9 @@
 
             mergeParams(params);
 
-            syncURL(true);
+            syncURL();
+
+            router.load();
 
         },
 
@@ -425,7 +395,9 @@
 
             router.params = normalize(params);
 
-            syncURL(true);
+            syncURL();
+
+            router.load();
 
         },
 
@@ -439,6 +411,8 @@
 
             replaceURL();
 
+            router.load();
+
         },
 
         /**
@@ -450,6 +424,8 @@
             mergeParams(params);
 
             replaceURL();
+
+            router.load();
 
         }
     };

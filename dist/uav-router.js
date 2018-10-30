@@ -1,7 +1,7 @@
 "use strict";
 
 (function () {
-  var pendingCallbacks = [];
+  var syncPending, loadPending;
   /**
    * Convert an object to key=value&key=value notation.
    */
@@ -49,13 +49,14 @@
    */
 
 
-  function syncURL(forceLoad) {
+  function syncURL() {
     var hash = serialize(router.params);
 
-    if (forceLoad && location.hash === hash) {
-      router.load();
-    } else {
-      location.hash = hash;
+    if (!syncPending) {
+      syncPending = true;
+      requestAnimationFrame(function () {
+        location.hash = hash;
+      });
     }
   }
   /**
@@ -65,25 +66,13 @@
 
 
   var hashchange = function hashchange() {
-    syncParams();
-    router.load();
+    if (syncPending) {
+      syncPending = false;
+    } else {
+      syncParams();
+      router.load();
+    }
   };
-  /**
-   * Start listening for URL changes
-   */
-
-
-  function bindHashChange() {
-    window.addEventListener('hashchange', hashchange);
-  }
-  /**
-   * Stop listening for URL changes
-   */
-
-
-  function unbindHashChange() {
-    window.removeEventListener('hashchange', hashchange);
-  }
   /**
    * Take either an object or a serialized string,
    * and return an object.
@@ -106,14 +95,10 @@
       return true;
     }
 
-    for (var i = 0; i < newKeys.length; i++) {
-      if (router.params[newKeys[i]] !== params[newKeys[i]]) {
-        return true;
-      }
-    }
+    var keys = newKeys.length > oldKeys.length ? newKeys : oldKeys;
 
-    for (var _i = 0; _i < oldKeys.length; _i++) {
-      if (router.params[oldKeys[_i]] !== params[oldKeys[_i]]) {
+    for (var i = 0; i < keys.length; i++) {
+      if (router.params[keys[i]] !== params[keys[i]]) {
         return true;
       }
     }
@@ -141,28 +126,6 @@
     if (location.hash !== hash) {
       history.replaceState(undefined, undefined, hash);
     }
-  }
-  /**
-   * Handles the given parameters, and runs the
-   * provided callback for changing the URL without
-   * reloading the app.
-   */
-
-
-  function changeURL(callback) {
-    if (!pendingCallbacks.length) {
-      unbindHashChange();
-      requestAnimationFrame(function () {
-        var callbacks = Array.from(pendingCallbacks);
-        pendingCallbacks = [];
-        callbacks.forEach(function (fn) {
-          return fn();
-        });
-        requestAnimationFrame(bindHashChange);
-      });
-    }
-
-    pendingCallbacks.push(callback);
   }
   /**
    * Remove the given parameters from router.params
@@ -195,7 +158,7 @@
     },
 
     /**
-     * Remove the provided keys form the URL
+     * Remove the provided keys from the URL
      * without adding a browser history entry
      */
     removeReplace: function removeReplace() {
@@ -204,7 +167,7 @@
       }
 
       if (removeParams(params)) {
-        changeURL(replaceURL);
+        replaceURL();
       }
     },
 
@@ -213,7 +176,7 @@
      */
     merge: function merge(params) {
       if (mergeParams(params)) {
-        changeURL(syncURL);
+        syncURL();
       }
     },
 
@@ -225,7 +188,7 @@
 
       if (force || paramsAreDifferent(params)) {
         router.params = params;
-        changeURL(syncURL);
+        syncURL();
       }
     },
 
@@ -238,7 +201,7 @@
 
       if (paramsAreDifferent(params)) {
         router.params = params;
-        changeURL(replaceURL);
+        replaceURL();
       }
     },
 
@@ -248,21 +211,24 @@
      */
     mergeReplace: function mergeReplace(params) {
       if (mergeParams(params)) {
-        changeURL(replaceURL);
+        replaceURL();
       }
     }
   };
   var router = {
     params: {},
     url: url,
-    unbound: 1,
 
     /**
      * Reload the app.
      */
     load: function load() {
-      if (router.app) {
-        router.app(router.params);
+      if (router.app && !loadPending) {
+        loadPending = true;
+        requestAnimationFrame(function () {
+          loadPending = false;
+          router.app(router.params);
+        });
       }
     },
 
@@ -271,7 +237,9 @@
      */
     init: function init(app) {
       router.app = app;
-      bindHashChange();
+      window.addEventListener('hashchange', hashchange, {
+        passive: true
+      });
       syncParams();
       router.load();
     },
@@ -286,11 +254,12 @@
       }
 
       removeParams(params);
-      syncURL(true);
+      syncURL();
+      router.load();
     },
 
     /**
-     * Remove the provided keys form the URL
+     * Remove the provided keys from the URL
      * without adding a browser history entry
      * and reload the app.
      */
@@ -301,6 +270,7 @@
 
       removeParams(params);
       replaceURL();
+      router.load();
     },
 
     /**
@@ -309,7 +279,8 @@
      */
     merge: function merge(params) {
       mergeParams(params);
-      syncURL(true);
+      syncURL();
+      router.load();
     },
 
     /**
@@ -318,7 +289,8 @@
      */
     set: function set(params) {
       router.params = normalize(params);
-      syncURL(true);
+      syncURL();
+      router.load();
     },
 
     /**
@@ -328,6 +300,7 @@
     replace: function replace(params) {
       router.params = normalize(params);
       replaceURL();
+      router.load();
     },
 
     /**
@@ -337,6 +310,7 @@
     mergeReplace: function mergeReplace(params) {
       mergeParams(params);
       replaceURL();
+      router.load();
     }
   };
   window.uav = window.uav || {};

@@ -52,7 +52,7 @@
   function syncURL() {
     var hash = serialize(router.params);
 
-    if (!syncPending) {
+    if (!syncPending && location.hash.substring(1) !== hash) {
       syncPending = true;
       requestAnimationFrame(function () {
         location.hash = hash;

@@ -332,15 +332,26 @@
          */
         init(app) {
 
-            router.app = app;
+            /**
+             * Support URLs that use query strings instead of hash fragments.
+             */
+            if (location.search) {
 
-            window.addEventListener('hashchange', hashchange, {
-                passive: true
-            });
+                location.href = location.href.replace('#', '&').replace('?', '#')
 
-            syncParams();
+            } else {
 
-            router.load();
+                router.app = app;
+
+                window.addEventListener('hashchange', hashchange, {
+                    passive: true
+                });
+
+                syncParams();
+
+                router.load();
+
+            }
 
         },
 

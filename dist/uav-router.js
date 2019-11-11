@@ -236,12 +236,19 @@
      * Register the app with the router, and run it.
      */
     init: function init(app) {
-      router.app = app;
-      window.addEventListener('hashchange', hashchange, {
-        passive: true
-      });
-      syncParams();
-      router.load();
+      /**
+       * Support URLs that use query strings instead of hash fragments.
+       */
+      if (location.search) {
+        location.href = location.href.replace('#', '&').replace('?', '#');
+      } else {
+        router.app = app;
+        window.addEventListener('hashchange', hashchange, {
+          passive: true
+        });
+        syncParams();
+        router.load();
+      }
     },
 
     /**

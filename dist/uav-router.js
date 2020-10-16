@@ -36,6 +36,10 @@
     });
     return obj;
   }
+
+  function canNavigate() {
+    return !router.canNavigate || router.canNavigate();
+  }
   /**
    * Set router.params to reflect the current URL
    */
@@ -52,7 +56,7 @@
   function syncURL() {
     var hash = serialize(router.params);
 
-    if (!syncPending && location.hash.substring(1) !== hash) {
+    if (!syncPending && location.hash.substring(1) !== hash && canNavigate()) {
       syncPending = true;
       requestAnimationFrame(function () {
         location.hash = hash;
@@ -65,10 +69,16 @@
    */
 
 
-  var hashchange = function hashchange() {
+  var hashchange = function hashchange(e) {
     if (syncPending) {
       syncPending = false;
     } else {
+      if (!canNavigate()) {
+        syncPending = true;
+        location.hash = serialize(router.params);
+        return e.preventDefault();
+      }
+
       syncParams();
       router.load();
     }
@@ -123,7 +133,7 @@
   function replaceURL() {
     var hash = '#' + serialize(router.params);
 
-    if (location.hash !== hash) {
+    if (location.hash !== hash && canNavigate()) {
       history.replaceState(undefined, undefined, hash);
     }
   }
@@ -223,7 +233,7 @@
      * Reload the app.
      */
     load: function load() {
-      if (router.app && !loadPending) {
+      if (router.app && !loadPending && canNavigate()) {
         loadPending = true;
         requestAnimationFrame(function () {
           loadPending = false;
@@ -243,9 +253,7 @@
         location.href = location.href.replace('#', '&').replace('?', '#');
       } else {
         router.app = app;
-        window.addEventListener('hashchange', hashchange, {
-          passive: true
-        });
+        window.addEventListener('hashchange', hashchange);
         syncParams();
         router.load();
       }
@@ -302,7 +310,7 @@
 
     /**
      * Replace the current URL without adding a
-     * browser history entry, and reload the app. 
+     * browser history entry, and reload the app.
      */
     replace: function replace(params) {
       router.params = normalize(params);

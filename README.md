@@ -15,7 +15,7 @@ import userProfile from './components/profile';
 import homepage from './components/homepage';
 
 /**
- * This is the entry point to the application. 
+ * This is the entry point to the application.
  * When the URL changes, this function will be called
  * with the new URL parameters.
  */
@@ -140,6 +140,12 @@ router.set('view=details&itemId=123');
 ## Reloading
 
 It's occasionally necessary to re-run the app entry function without changing anything in the URL (usually after some other app state has changed, such as credential expiry). This can be done by calling `router.load()`.
+
+## Prevent Navigation
+
+If you need to run some logic in order to determine whether navigation should be allowed, set `router.canNavigate` to a function that returns a truthy or falsy value.
+
+`router.canNavigate = () => myRoutingCheck();`
 
 # Browser support
 

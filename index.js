@@ -55,9 +55,9 @@
 
     }
 
-    function canNavigate() {
+    function canNavigate(retry) {
 
-        return !router.canNavigate || router.canNavigate();
+        return !router.canNavigate || router.canNavigate(retry);
 
     }
 
@@ -77,7 +77,7 @@
 
         const hash = serialize(router.params);
 
-        if (!syncPending && location.hash.substring(1) !== hash && canNavigate()) {
+        if (!syncPending && location.hash.substring(1) !== hash) {
 
             syncPending = true;
 
@@ -103,7 +103,11 @@
 
         } else {
 
-            if (!canNavigate()) {
+            function retry() {
+                location.href = e.newURL;
+            }
+
+            if (!canNavigate(retry)) {
 
                 syncPending = true;
 
@@ -192,7 +196,7 @@
 
         const hash = '#' + serialize(router.params);
 
-        if (location.hash !== hash && canNavigate()) {
+        if (location.hash !== hash) {
 
             history.replaceState(undefined, undefined, hash);
 
@@ -327,7 +331,7 @@
          */
         load() {
 
-            if (router.app && !loadPending && canNavigate()) {
+            if (router.app && !loadPending) {
 
                 loadPending = true;
 
@@ -375,11 +379,15 @@
          */
         remove(...params) {
 
-            removeParams(params);
+            if (canNavigate(() => router.remove(...params))) {
 
-            syncURL();
+                removeParams(params);
 
-            router.load();
+                syncURL();
+
+                router.load();
+
+            }
 
         },
 
@@ -390,11 +398,15 @@
          */
         removeReplace(...params) {
 
-            removeParams(params);
+            if (canNavigate(() => router.removeReplace(...params))) {
 
-            replaceURL();
+                removeParams(params);
 
-            router.load();
+                replaceURL();
+
+                router.load();
+
+            }
 
         },
 
@@ -404,11 +416,15 @@
          */
         merge(params) {
 
-            mergeParams(params);
+            if (canNavigate(() => router.merge(params))) {
 
-            syncURL();
+                mergeParams(params);
 
-            router.load();
+                syncURL();
+
+                router.load();
+
+            }
 
         },
 
@@ -418,11 +434,15 @@
          */
         set(params) {
 
-            router.params = normalize(params);
+            if (canNavigate(() => router.set(params))) {
 
-            syncURL();
+                router.params = normalize(params);
 
-            router.load();
+                syncURL();
+
+                router.load();
+
+            }
 
         },
 
@@ -432,11 +452,15 @@
          */
         replace(params) {
 
-            router.params = normalize(params);
+            if (canNavigate(() => router.replace(params))) {
 
-            replaceURL();
+                router.params = normalize(params);
 
-            router.load();
+                replaceURL();
+
+                router.load();
+
+            }
 
         },
 
@@ -446,11 +470,15 @@
          */
         mergeReplace(params) {
 
-            mergeParams(params);
+            if (canNavigate(() => router.mergeReplace(params))) {
 
-            replaceURL();
+                mergeParams(params);
 
-            router.load();
+                replaceURL();
+
+                router.load();
+
+            }
 
         }
     };

@@ -37,8 +37,8 @@
     return obj;
   }
 
-  function canNavigate() {
-    return !router.canNavigate || router.canNavigate();
+  function canNavigate(retry) {
+    return !router.canNavigate || router.canNavigate(retry);
   }
   /**
    * Set router.params to reflect the current URL
@@ -56,7 +56,7 @@
   function syncURL() {
     var hash = serialize(router.params);
 
-    if (!syncPending && location.hash.substring(1) !== hash && canNavigate()) {
+    if (!syncPending && location.hash.substring(1) !== hash) {
       syncPending = true;
       requestAnimationFrame(function () {
         location.hash = hash;
@@ -73,7 +73,11 @@
     if (syncPending) {
       syncPending = false;
     } else {
-      if (!canNavigate()) {
+      var retry = function retry() {
+        location.href = e.newURL;
+      };
+
+      if (!canNavigate(retry)) {
         syncPending = true;
         location.hash = serialize(router.params);
         return e.preventDefault();
@@ -133,7 +137,7 @@
   function replaceURL() {
     var hash = '#' + serialize(router.params);
 
-    if (location.hash !== hash && canNavigate()) {
+    if (location.hash !== hash) {
       history.replaceState(undefined, undefined, hash);
     }
   }
@@ -233,7 +237,7 @@
      * Reload the app.
      */
     load: function load() {
-      if (router.app && !loadPending && canNavigate()) {
+      if (router.app && !loadPending) {
         loadPending = true;
         requestAnimationFrame(function () {
           loadPending = false;
@@ -268,9 +272,13 @@
         params[_key3] = arguments[_key3];
       }
 
-      removeParams(params);
-      syncURL();
-      router.load();
+      if (canNavigate(function () {
+        return router.remove.apply(router, params);
+      })) {
+        removeParams(params);
+        syncURL();
+        router.load();
+      }
     },
 
     /**
@@ -283,9 +291,13 @@
         params[_key4] = arguments[_key4];
       }
 
-      removeParams(params);
-      replaceURL();
-      router.load();
+      if (canNavigate(function () {
+        return router.removeReplace.apply(router, params);
+      })) {
+        removeParams(params);
+        replaceURL();
+        router.load();
+      }
     },
 
     /**
@@ -293,9 +305,13 @@
      * and reload the app.
      */
     merge: function merge(params) {
-      mergeParams(params);
-      syncURL();
-      router.load();
+      if (canNavigate(function () {
+        return router.merge(params);
+      })) {
+        mergeParams(params);
+        syncURL();
+        router.load();
+      }
     },
 
     /**
@@ -303,9 +319,13 @@
      * and reload the app
      */
     set: function set(params) {
-      router.params = normalize(params);
-      syncURL();
-      router.load();
+      if (canNavigate(function () {
+        return router.set(params);
+      })) {
+        router.params = normalize(params);
+        syncURL();
+        router.load();
+      }
     },
 
     /**
@@ -313,9 +333,13 @@
      * browser history entry, and reload the app.
      */
     replace: function replace(params) {
-      router.params = normalize(params);
-      replaceURL();
-      router.load();
+      if (canNavigate(function () {
+        return router.replace(params);
+      })) {
+        router.params = normalize(params);
+        replaceURL();
+        router.load();
+      }
     },
 
     /**
@@ -323,9 +347,13 @@
      * a browser history entry, and reload the app.
      */
     mergeReplace: function mergeReplace(params) {
-      mergeParams(params);
-      replaceURL();
-      router.load();
+      if (canNavigate(function () {
+        return router.mergeReplace(params);
+      })) {
+        mergeParams(params);
+        replaceURL();
+        router.load();
+      }
     }
   };
   window.uav = window.uav || {};

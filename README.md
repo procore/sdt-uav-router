@@ -143,9 +143,9 @@ It's occasionally necessary to re-run the app entry function without changing an
 
 ## Prevent Navigation
 
-If you need to run some logic in order to determine whether navigation should be allowed, set `router.canNavigate` to a function that returns a truthy or falsy value.
+If you need to run some logic in order to determine whether navigation should be allowed, set `router.canNavigate` to a function that returns a truthy or falsy value. This function will be passed a callback to retry the navigation.
 
-`router.canNavigate = () => myRoutingCheck();`
+`router.canNavigate = retry => myRoutingCheck(retry);`
 
 # Browser support
 

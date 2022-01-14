@@ -24,7 +24,10 @@
   "devDependencies": {
     "@babel/cli": "7.11.6",
     "@babel/core": "^7.1.2",
-    "@babel/preset-env": "^7.1.0",
+    "@babel/preset-env": "7.11.5",
+    "browserslist": "4.16.5",
+    "glob-parent": "5.1.2",
+    "path-parse": "1.0.7",
     "uglify-js": "^3.1.5"
   },
   "babel": {

@@ -26,7 +26,7 @@
     "@babel/core": "^7.1.2",
     "@babel/preset-env": "7.11.5",
     "browserslist": "4.16.5",
-    "glob-parent": "5.1.2",
+    "glob-parent": "6.0.2",
     "path-parse": "1.0.7",
     "uglify-js": "^3.1.5"
   },

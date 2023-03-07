@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/unearth-inc/uav-router#readme",
   "devDependencies": {
-    "@babel/cli": "7.20.7",
+    "@babel/cli": "7.21.0",
     "@babel/core": "^7.1.2",
     "@babel/preset-env": "7.20.2",
     "browserslist": "4.21.5",

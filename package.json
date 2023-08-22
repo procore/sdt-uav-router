@@ -1,6 +1,6 @@
 {
   "name": "uav-router",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Simple hash-based routing for single page apps",
   "main": "dist/uav-router.js",
   "scripts": {
@@ -25,9 +25,6 @@
     "@babel/cli": "7.22.5",
     "@babel/core": "^7.1.2",
     "@babel/preset-env": "7.22.5",
-    "browserslist": "4.21.10",
-    "glob-parent": "6.0.2",
-    "path-parse": "1.0.7",
     "uglify-js": "^3.1.5"
   },
   "babel": {

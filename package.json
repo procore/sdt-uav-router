@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/unearth-inc/uav-router.git"
+    "url": "git+https://github.com/procore/sdt-uav-router.git"
   },
   "keywords": [
     "router",
@@ -18,9 +18,9 @@
   "author": "unearth",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/unearth-inc/uav-router/issues"
+    "url": "https://github.com/procore/sdt-uav-router/issues"
   },
-  "homepage": "https://github.com/unearth-inc/uav-router#readme",
+  "homepage": "https://github.com/procore/sdt-uav-router#readme",
   "devDependencies": {
     "@babel/cli": "7.22.5",
     "@babel/core": "^7.1.2",

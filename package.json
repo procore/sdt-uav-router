@@ -24,7 +24,7 @@
   "devDependencies": {
     "@babel/cli": "7.24.1",
     "@babel/core": "^7.1.2",
-    "@babel/preset-env": "7.24.3",
+    "@babel/preset-env": "7.24.6",
     "uglify-js": "^3.1.5"
   },
   "babel": {

@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/procore/sdt-uav-router#readme",
   "devDependencies": {
-    "@babel/cli": "7.24.1",
+    "@babel/cli": "7.24.6",
     "@babel/core": "^7.1.2",
     "@babel/preset-env": "7.24.3",
     "uglify-js": "^3.1.5"

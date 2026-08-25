@@ -6,6 +6,15 @@ Unlike many routers, `uav-router` uses the hash fragment of the URL as a key-val
 
 By definition all single page apps serve the same file regardless of the URL. Reflecting this reality in application routing leads to nontrivial complexity savings. `uav-router` is 700 bytes gzipped.
 
+## Maintenance status
+
+This library is stable and no longer under active development. The `dist/`
+build is checked into the repo, so `devDependencies` (Babel, uglify-js, etc.)
+have been removed to stop recurring Dependabot vulnerability alerts on unused
+build tooling — none of it ships in the published package. To rebuild, restore
+the `devDependencies` block from git history (see the commit that removed it)
+and run `npm install`.
+
 ## Example
 
 ```javascript
